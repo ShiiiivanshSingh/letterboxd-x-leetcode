@@ -1,0 +1,1972 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>letterboxd × leetcode</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230b0b0b'/><circle cx='11' cy='16' r='6' fill='%2300e054' opacity='0.85'/><circle cx='21' cy='16' r='6' fill='%23ffa116' opacity='0.85'/><path d='M15.27 11.46a6 6 0 0 1 0 9.08A6 6 0 0 1 15.27 11.46Z' fill='%2340bcf4'/></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0b0b;
+            --surface: #141414;
+            --surface-hover: #1a1a1a;
+            --line: #222;
+            --line-soft: #1a1a1a;
+            --text: #e0e0e0;
+            --text-dim: #6b6b6b;
+            --text-dimmer: #3d3d3d;
+            --lb: #00e054;
+            --lb-dark: #0a3a1e;
+            --lb-mid: #0f7a35;
+            --lc: #ffa116;
+            --lc-dark: #3d2a08;
+            --lc-mid: #8a5c0f;
+            --both: #40bcf4;
+            --err: #d45;
+            --font: 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 15px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ── focus styles ── */
+        :focus-visible {
+            outline: 2px solid var(--both);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        /* ── layout ── */
+        .page {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 64px 24px 100px;
+        }
+
+        @media (max-width: 600px) {
+            .page {
+                padding: 40px 16px 80px;
+            }
+        }
+
+        /* ── header ── */
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .header h1 {
+            font-size: 15px;
+            font-weight: 400;
+            letter-spacing: 0.08em;
+            color: var(--text-dim);
+        }
+
+        .header h1 .x {
+            color: var(--text-dimmer);
+            margin: 0 2px;
+        }
+
+        /* ── offline banner ── */
+        .offline-banner {
+            display: none;
+            text-align: center;
+            padding: 10px 16px;
+            background: #2a1a0a;
+            border: 1px solid #4a3010;
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--lc);
+            margin-bottom: 24px;
+        }
+
+        .offline-banner.show {
+            display: block;
+        }
+
+        /* ── input section ── */
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .field-group {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        @media (max-width: 500px) {
+            .field-group {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+
+        .field-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-dim);
+            min-width: 90px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 500px) {
+            .field-label {
+                text-align: left;
+                min-width: auto;
+            }
+        }
+
+        input[type=text] {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--line);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 16px;
+            font-weight: 300;
+            padding: 8px 0;
+            flex: 1;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type=text]:focus {
+            border-bottom-color: var(--text-dim);
+        }
+
+        input[type=text]::placeholder {
+            color: var(--text-dimmer);
+            font-weight: 300;
+        }
+
+        input[type=text].field-error {
+            border-bottom-color: var(--err);
+        }
+
+        .file-btn {
+            display: inline-block;
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-dim);
+            border: 1px solid var(--line);
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .file-btn:hover {
+            border-color: var(--text-dim);
+            color: var(--text);
+        }
+
+        .file-btn.picked {
+            color: var(--lb);
+            border-color: var(--lb-dark);
+        }
+
+        .file-btn.file-error {
+            border-color: var(--err);
+            color: var(--err);
+        }
+
+        /* ── controls row ── */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .range-toggle {
+            display: flex;
+            gap: 4px;
+        }
+
+        .range-btn {
+            font-family: var(--font);
+            font-size: 13px;
+            font-weight: 400;
+            background: transparent;
+            border: 1px solid var(--line);
+            color: var(--text-dim);
+            padding: 7px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .range-btn:hover {
+            border-color: var(--text-dim);
+        }
+
+        .range-btn.active {
+            background: var(--text);
+            color: var(--bg);
+            border-color: var(--text);
+        }
+
+        .run-btn {
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 500;
+            background: var(--text);
+            color: var(--bg);
+            border: none;
+            padding: 9px 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            position: relative;
+        }
+
+        .run-btn:hover {
+            opacity: 0.85;
+        }
+
+        .run-btn:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+        .run-btn .spinner {
+            display: none;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--bg);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 6px;
+            vertical-align: -2px;
+        }
+
+        .run-btn.loading .spinner {
+            display: inline-block;
+        }
+
+        .run-btn.loading .btn-text {
+            opacity: 0.7;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── hint ── */
+        .hint {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-dimmer);
+            margin-top: -8px;
+        }
+
+        .hint-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            border-bottom: 1px solid var(--text-dimmer);
+            transition: color 0.2s;
+        }
+
+        .hint-link:hover {
+            color: var(--text);
+        }
+
+        /* ── status ── */
+        .status-line {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-dim);
+            min-height: 20px;
+            margin-top: 4px;
+        }
+
+        .status-line .err {
+            color: var(--err);
+        }
+
+        .status-line .ok {
+            color: var(--lb);
+        }
+
+        /* ── output ── */
+        .out {
+            display: none;
+            margin-top: 56px;
+        }
+
+        .out.show {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* ── heatmap panels — side by side, centered ── */
+        .panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            justify-items: center;
+        }
+
+        @media (max-width: 700px) {
+            .panels {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 28px 24px;
+            overflow-x: auto;
+            width: 100%;
+            box-shadow: 0 0 0 1px var(--line-soft), 0 12px 32px -16px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .panel-head {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .panel-head .name {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .panel-head .lb-name {
+            color: var(--lb);
+        }
+
+        .panel-head .lc-name {
+            color: var(--lc);
+        }
+
+        .panel-head .total {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 0.01em;
+        }
+
+        /* ── heatmap grid ── */
+        .grid {
+            display: grid;
+            grid-template-rows: repeat(7, 18px);
+            gap: 4px;
+            margin: 0 auto;
+            justify-content: center;
+        }
+
+        .cell {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            background: var(--line-soft);
+            position: relative;
+            transition: transform 0.12s, box-shadow 0.12s;
+            cursor: default;
+        }
+
+        .cell:hover {
+            transform: scale(1.45);
+            z-index: 2;
+        }
+
+        .cell:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg);
+            border: 1px solid var(--line);
+            color: var(--text);
+            padding: 7px 10px;
+            font-family: var(--font);
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.6;
+            border-radius: 5px;
+            white-space: pre-line;
+            text-align: left;
+            max-width: 220px;
+            width: max-content;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .lb .cell[data-lvl="1"] {
+            background: var(--lb-dark);
+        }
+
+        .lb .cell[data-lvl="2"] {
+            background: var(--lb-mid);
+        }
+
+        .lb .cell[data-lvl="3"] {
+            background: var(--lb);
+        }
+
+        .lc .cell[data-lvl="1"] {
+            background: var(--lc-dark);
+        }
+
+        .lc .cell[data-lvl="2"] {
+            background: var(--lc-mid);
+        }
+
+        .lc .cell[data-lvl="3"] {
+            background: var(--lc);
+        }
+
+        /* ── heatmap legend ── */
+        .legend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin-top: 16px;
+            font-size: 11px;
+            color: var(--text-dimmer);
+        }
+
+        .legend-cell {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        /* ── empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-dimmer);
+            font-size: 14px;
+            font-weight: 300;
+        }
+
+        .empty-state .empty-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        /* ── divider ── */
+        .divider {
+            width: 48px;
+            height: 1px;
+            background: var(--line);
+            margin: 48px auto;
+        }
+
+        /* ── charts section ── */
+        .charts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        @media (max-width: 700px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 24px;
+        }
+
+        .chart-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+        }
+
+        .chart-subtitle {
+            font-size: 11px;
+            font-weight: 300;
+            color: var(--text-dimmer);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .chart-canvas-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chart-canvas-wrap canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* ── pie legend ── */
+        .pie-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 16px;
+            justify-content: center;
+        }
+
+        .pie-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .pie-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ── personality badge ── */
+        .personality {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .personality-label {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .personality-sub {
+            font-size: 14px;
+            font-weight: 300;
+            color: var(--text-dim);
+            max-width: 460px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* ── fun stat cards ── */
+        .fun-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            max-width: 640px;
+            margin: 0 auto 32px;
+        }
+
+        @media (max-width: 540px) {
+            .fun-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .fun-card {
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 22px;
+            border-left: 3px solid var(--line);
+        }
+
+        .fun-card.card-lb {
+            border-left-color: var(--lb);
+        }
+
+        .fun-card.card-lc {
+            border-left-color: var(--lc);
+        }
+
+        .fun-card.card-both {
+            border-left-color: var(--both);
+        }
+
+        .fun-card-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.3;
+            margin-bottom: 6px;
+        }
+
+        .fun-card-value .accent-lb {
+            color: var(--lb);
+        }
+
+        .fun-card-value .accent-lc {
+            color: var(--lc);
+        }
+
+        .fun-card-value .accent-both {
+            color: var(--both);
+        }
+
+        .fun-card-desc {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        /* ── collapsible more insights ── */
+        .more-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            font-family: var(--font);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-dim);
+            background: none;
+            border: 1px solid var(--line);
+            padding: 10px 24px;
+            border-radius: 8px;
+            margin: 0 auto;
+            transition: all 0.2s;
+            width: fit-content;
+        }
+
+        .more-toggle:hover {
+            border-color: var(--text-dim);
+            color: var(--text);
+        }
+
+        .more-toggle .chevron {
+            display: inline-block;
+            transition: transform 0.3s;
+            font-size: 11px;
+        }
+
+        .more-toggle.open .chevron {
+            transform: rotate(180deg);
+        }
+
+        .more-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease, opacity 0.4s ease;
+            opacity: 0;
+        }
+
+        .more-content.open {
+            max-height: 3000px;
+            opacity: 1;
+        }
+
+        .more-inner {
+            padding-top: 32px;
+        }
+
+        /* ── stat grid inside more ── */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            max-width: 640px;
+            margin: 0 auto 24px;
+        }
+
+        @media (max-width: 540px) {
+            .stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat {
+            text-align: center;
+            padding: 16px 10px;
+            background: var(--surface);
+            border-radius: 8px;
+        }
+
+        .stat .num {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .stat .num.lb-c {
+            color: var(--lb);
+        }
+
+        .stat .num.lc-c {
+            color: var(--lc);
+        }
+
+        .stat .num.both-c {
+            color: var(--both);
+        }
+
+        .stat .lab {
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--text-dim);
+            margin-top: 5px;
+        }
+
+        /* ── verdicts ── */
+        .verdicts {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        .verdict {
+            margin-bottom: 14px;
+            font-size: 14px;
+            font-weight: 300;
+            color: var(--text-dim);
+            line-height: 1.7;
+            padding-left: 16px;
+            border-left: 2px solid var(--line);
+        }
+
+        /* ── topbar icons ── */
+        .topbar {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .icon-btn {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .icon-btn:hover {
+            border-color: var(--text-dim);
+            color: var(--text);
+        }
+
+        .icon-btn svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        .info-wrap {
+            position: relative;
+        }
+
+        .info-popover {
+            display: none;
+            position: absolute;
+            top: 38px;
+            left: 0;
+            width: 260px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 12px;
+            font-weight: 300;
+            line-height: 1.7;
+            color: var(--text-dim);
+            box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        .info-popover.open {
+            display: block;
+        }
+
+        /* ── made by credit ── */
+        .made-by {
+            text-align: center;
+            margin-top: 64px;
+            font-size: 12px;
+            font-weight: 300;
+            color: var(--text-dimmer);
+        }
+
+        .made-by a {
+            color: var(--text-dim);
+            text-decoration: none;
+            border-bottom: 1px solid var(--text-dimmer);
+            transition: color 0.2s;
+        }
+
+        .made-by a:hover {
+            color: var(--text);
+        }
+
+        .made-by .sep {
+            margin: 0 8px;
+            color: var(--text-dimmer);
+        }
+
+        /* ── skip-to-content (a11y) ── */
+        .skip-link {
+            position: absolute;
+            top: -100px;
+            left: 16px;
+            background: var(--text);
+            color: var(--bg);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            z-index: 100;
+            text-decoration: none;
+            transition: top 0.2s;
+        }
+
+        .skip-link:focus {
+            top: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="#main" class="skip-link">skip to content</a>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <div class="topbar">
+        <div class="info-wrap">
+            <button class="icon-btn" id="infoBtn" type="button" aria-label="how this works" aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="11" x2="12" y2="16"></line>
+                    <line x1="12" y1="7.5" x2="12" y2="7.51"></line>
+                </svg>
+            </button>
+            <div class="info-popover" id="infoPopover" role="tooltip">
+                your letterboxd zip is read entirely in-browser and never leaves it. leetcode data comes from a public
+                calendar endpoint via a cors relay — if that fetch fails, the relay is likely rate-limiting, or the
+                username is wrong.
+            </div>
+        </div>
+        <a class="icon-btn" href="https://github.com/YOUR-USERNAME/YOUR-REPO" target="_blank" rel="noopener"
+            aria-label="view source on github">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M12 .5C5.73.5.5 5.73.5 12c0 5.09 3.29 9.4 7.86 10.93.58.1.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.17.08 1.78 1.2 1.78 1.2 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.8 1.19 1.83 1.19 3.09 0 4.43-2.69 5.4-5.25 5.69.41.36.78 1.07.78 2.15 0 1.55-.01 2.8-.01 3.18 0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12c0-6.27-5.23-11.5-11.5-11.5z" />
+            </svg>
+        </a>
+    </div>
+
+    <div class="page" id="main" role="main">
+
+        <div class="header">
+            <h1>letterboxd <span class="x">×</span> leetcode</h1>
+        </div>
+
+        <div class="offline-banner" id="offlineBanner" role="alert">
+            you're offline — leetcode data won't load until you reconnect
+        </div>
+
+        <form class="input-section" id="compareForm" aria-label="comparison inputs" onsubmit="return false;">
+            <div class="field-group">
+                <label class="field-label" for="lbFileBtn">letterboxd</label>
+                <span class="file-btn" role="button" tabindex="0" id="lbFileLabel"
+                    aria-label="choose letterboxd zip export"
+                    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('lbFile').click();}">choose
+                    .zip</span>
+                <input type="file" id="lbFile" accept=".zip" style="display:none;" aria-hidden="true">
+            </div>
+            <div class="field-group">
+                <label class="field-label" for="lcInput">leetcode</label>
+                <input type="text" id="lcInput" placeholder="username" autocomplete="off" aria-label="leetcode username"
+                    maxlength="40">
+            </div>
+            <div class="hint">
+                no export? grab one from <a class="hint-link" href="https://letterboxd.com/user/exportdata/"
+                    target="_blank" rel="noopener">letterboxd.com/user/exportdata</a>
+            </div>
+            <div class="controls">
+                <div class="range-toggle" role="radiogroup" aria-label="date range">
+                    <button class="range-btn active" data-range="30" role="radio" aria-checked="true" type="button">past
+                        30 days</button>
+                    <button class="range-btn" data-range="month" role="radio" aria-checked="false" type="button">this
+                        month</button>
+                </div>
+                <button class="run-btn" id="runBtn" type="button" aria-label="run comparison">
+                    <span class="spinner"></span>
+                    <span class="btn-text">compare</span>
+                </button>
+            </div>
+            <div class="status-line" id="status" role="status" aria-live="polite"></div>
+        </form>
+
+        <div class="out" id="out">
+
+            <!-- side-by-side heatmaps -->
+            <div class="panels" id="panels">
+                <div class="panel lb" id="lbPanel">
+                    <div class="panel-head">
+                        <span class="name lb-name" id="lbName">letterboxd</span>
+                        <span class="total" id="lbTotal">0 logged</span>
+                    </div>
+                    <div class="grid" id="lbGrid"></div>
+                    <div class="legend" id="lbLegend">
+                        <span>less</span>
+                        <div class="legend-cell" style="background:var(--line-soft)"></div>
+                        <div class="legend-cell" style="background:var(--lb-dark)"></div>
+                        <div class="legend-cell" style="background:var(--lb-mid)"></div>
+                        <div class="legend-cell" style="background:var(--lb)"></div>
+                        <span>more</span>
+                    </div>
+                </div>
+                <div class="panel lc" id="lcPanel">
+                    <div class="panel-head">
+                        <span class="name lc-name" id="lcName">leetcode</span>
+                        <span class="total" id="lcTotal">0 submissions</span>
+                    </div>
+                    <div class="grid" id="lcGrid"></div>
+                    <div class="legend" id="lcLegend">
+                        <span>less</span>
+                        <div class="legend-cell" style="background:var(--line-soft)"></div>
+                        <div class="legend-cell" style="background:var(--lc-dark)"></div>
+                        <div class="legend-cell" style="background:var(--lc-mid)"></div>
+                        <div class="legend-cell" style="background:var(--lc)"></div>
+                        <span>more</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- personality + fun insights (always visible) -->
+            <div class="personality" id="personality"></div>
+            <div class="fun-stats" id="funStats"></div>
+            <div class="verdicts" id="verdicts"></div>
+
+            <div style="margin-top:32px;"></div>
+
+            <button class="more-toggle" id="moreToggle" type="button" aria-expanded="false">
+                view more insights <span class="chevron">▼</span>
+            </button>
+            <div class="more-content" id="moreContent">
+                <div class="more-inner">
+                    <div class="stat-grid" id="statGrid"></div>
+
+                    <div class="charts-section">
+                        <div class="chart-card">
+                            <div class="chart-title">how you spent your days</div>
+                            <div class="chart-subtitle" id="pieSub"></div>
+                            <div class="chart-canvas-wrap">
+                                <canvas id="pieChart" width="220" height="220"></canvas>
+                            </div>
+                            <div class="pie-legend" id="pieLegend"></div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-title">who's winning?</div>
+                            <div class="chart-subtitle" id="scoreSub"></div>
+                            <div class="chart-canvas-wrap">
+                                <canvas id="barChart" width="400" height="220"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="charts-section">
+                        <div class="chart-card">
+                            <div class="chart-title">the race over time</div>
+                            <div class="chart-subtitle" id="raceSub"></div>
+                            <div class="chart-canvas-wrap">
+                                <canvas id="lineChart" width="400" height="220"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-title">your week, decoded</div>
+                            <div class="chart-subtitle" id="weekSub"></div>
+                            <div class="chart-canvas-wrap">
+                                <canvas id="weekdayChart" width="400" height="220"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="made-by">
+            made by shivansh
+            <span class="sep">·</span>
+            <a href="https://leetcode.com/u/ShivanshPratapSingh/" target="_blank" rel="noopener">leetcode</a>
+            <span class="sep">·</span>
+            <a href="https://letterboxd.com/ShivanshSingh" target="_blank" rel="noopener">letterboxd</a>
+        </div>
+    </div>
+
+    <script>
+        let currentRange = '30';
+        let pickedZipFile = null;
+        let lastResults = null;
+
+        const offlineBanner = document.getElementById('offlineBanner');
+        function updateOnlineStatus() {
+            if (!navigator.onLine) {
+                offlineBanner.classList.add('show');
+            } else {
+                offlineBanner.classList.remove('show');
+            }
+        }
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+
+        document.querySelectorAll('.range-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.range-btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-checked', 'false');
+                });
+                btn.classList.add('active');
+                btn.setAttribute('aria-checked', 'true');
+                currentRange = btn.dataset.range;
+            });
+        });
+
+        function dateKey(d) {
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
+        function getRangeDates(range) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const dates = [];
+            if (range === 'month') {
+                const first = new Date(today.getFullYear(), today.getMonth(), 1);
+                for (let d = new Date(first); d <= today; d.setDate(d.getDate() + 1)) {
+                    dates.push(new Date(d));
+                }
+            } else {
+                for (let i = 29; i >= 0; i--) {
+                    const d = new Date(today);
+                    d.setDate(d.getDate() - i);
+                    dates.push(d);
+                }
+            }
+            return dates;
+        }
+
+        const DAY_NAMES = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+        function parseCSV(text) {
+            const rows = [];
+            let row = [], field = '', inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                const c = text[i];
+                if (inQuotes) {
+                    if (c === '"') {
+                        if (text[i + 1] === '"') { field += '"'; i++; } else inQuotes = false;
+                    } else field += c;
+                } else {
+                    if (c === '"') inQuotes = true;
+                    else if (c === ',') { row.push(field); field = ''; }
+                    else if (c === '\r') continue;
+                    else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+                    else field += c;
+                }
+            }
+            if (field.length || row.length) { row.push(field); rows.push(row); }
+            const header = rows.shift();
+            if (!header) return [];
+            return rows.filter(r => r.length === header.length).map(r => {
+                const obj = {};
+                header.forEach((h, i) => obj[h] = r[i]);
+                return obj;
+            });
+        }
+
+        async function parseLetterboxdZip(file) {
+            if (!file.name.endsWith('.zip')) {
+                throw new Error('please select a .zip file');
+            }
+            let zip;
+            try {
+                zip = await JSZip.loadAsync(file);
+            } catch (e) {
+                throw new Error('couldn\'t read this file — make sure it\'s a valid zip');
+            }
+            const diaryFile = zip.file('diary.csv');
+            if (!diaryFile) throw new Error('this zip has no diary.csv — export from letterboxd.com/user/exportdata');
+            const diaryText = await diaryFile.async('string');
+            const rows = parseCSV(diaryText);
+            if (rows.length === 0) throw new Error('diary.csv is empty — have you logged any films?');
+            const entries = rows.map(r => ({
+                date: r['Watched Date'],
+                title: r['Name'],
+                rating: r['Rating'] || null
+            })).filter(e => e.date && e.title);
+
+            let username = null;
+            const profileFile = zip.file('profile.csv');
+            if (profileFile) {
+                const profileText = await profileFile.async('string');
+                const profileRows = parseCSV(profileText);
+                if (profileRows[0] && profileRows[0]['Username']) username = profileRows[0]['Username'];
+            }
+            return { entries, username };
+        }
+
+        async function fetchLeetcode(username) {
+            if (!navigator.onLine) {
+                throw new Error('you\'re offline — can\'t fetch leetcode data right now');
+            }
+
+            const primary = `https://alfa-leetcode-api.onrender.com/${encodeURIComponent(username)}/calendar`;
+            let calendarStr = null;
+
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 15000);
+
+            try {
+                const res = await fetch(primary, { signal: controller.signal });
+                clearTimeout(timeout);
+                if (res.ok) {
+                    const data = await res.json();
+                    calendarStr = data.submissionCalendar;
+                }
+            } catch (e) {
+                clearTimeout(timeout);
+            }
+
+            if (!calendarStr) {
+                const gqlBody = {
+                    query: `query userProfileCalendar($username: String!) { matchedUser(username: $username) { userCalendar { submissionCalendar } } }`,
+                    variables: { username }
+                };
+                const proxied = `https://corsproxy.io/?url=${encodeURIComponent('https://leetcode.com/graphql')}`;
+
+                const controller2 = new AbortController();
+                const timeout2 = setTimeout(() => controller2.abort(), 15000);
+
+                try {
+                    const res = await fetch(proxied, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(gqlBody),
+                        signal: controller2.signal
+                    });
+                    clearTimeout(timeout2);
+                    if (!res.ok) throw new Error('leetcode fetch failed (' + res.status + ')');
+                    const json = await res.json();
+                    const cal = json && json.data && json.data.matchedUser && json.data.matchedUser.userCalendar;
+                    if (!cal) throw new Error('no leetcode data found — check the username');
+                    calendarStr = cal.submissionCalendar;
+                } catch (e) {
+                    clearTimeout(timeout2);
+                    if (e.name === 'AbortError') {
+                        throw new Error('leetcode request timed out — try again');
+                    }
+                    throw e;
+                }
+            }
+
+            if (!calendarStr) throw new Error('leetcode returned no calendar data');
+            const parsed = JSON.parse(calendarStr);
+            const map = {};
+            for (const ts in parsed) {
+                const d = new Date(parseInt(ts, 10) * 1000);
+                map[dateKey(d)] = parsed[ts];
+            }
+            return map;
+        }
+
+        function buildLetterboxdMap(entries) {
+            const map = {};
+            for (const e of entries) {
+                if (!map[e.date]) map[e.date] = [];
+                map[e.date].push(e);
+            }
+            return map;
+        }
+
+        function levelFor(count, max) {
+            if (count <= 0) return 0;
+            if (max <= 1) return 3;
+            const ratio = count / max;
+            if (ratio > 0.66) return 3;
+            if (ratio > 0.33) return 2;
+            return 1;
+        }
+
+        function renderGrid(containerId, dates, valueFn, tipFn) {
+            const grid = document.getElementById(containerId);
+            grid.innerHTML = '';
+            if (dates.length === 0) return;
+            const counts = dates.map(d => valueFn(d));
+            const max = Math.max(...counts, 1);
+            const numWeeks = Math.ceil(dates.length / 7);
+            grid.style.gridTemplateColumns = `repeat(${numWeeks}, 18px)`;
+            const firstDow = dates[0].getDay();
+            for (let i = 0; i < firstDow; i++) {
+                const filler = document.createElement('div');
+                filler.style.gridRow = String(i + 1);
+                filler.style.gridColumn = '1';
+                grid.appendChild(filler);
+            }
+            dates.forEach((d, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                const count = valueFn(d);
+                const dow = d.getDay();
+                const week = Math.floor((idx + firstDow) / 7) + 1;
+                cell.style.gridRow = String(dow + 1);
+                cell.style.gridColumn = String(week);
+                cell.dataset.lvl = String(levelFor(count, max));
+                cell.dataset.tip = tipFn(d, count);
+                cell.setAttribute('role', 'gridcell');
+                cell.setAttribute('aria-label', tipFn(d, count));
+                grid.appendChild(cell);
+            });
+        }
+
+        function drawPieChart(canvasId, legendId, stats) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const w = 220, h = 220;
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
+            ctx.scale(dpr, dpr);
+            ctx.clearRect(0, 0, w, h);
+
+            const cx = w / 2, cy = h / 2, r = 85;
+            const onlyLb = stats.lbDays - stats.bothDays;
+            const onlyLc = stats.lcDays - stats.bothDays;
+            const segments = [
+                { label: 'double threat', value: stats.bothDays, color: '#40bcf4' },
+                { label: 'movie night', value: Math.max(0, onlyLb), color: '#00e054' },
+                { label: 'grind mode', value: Math.max(0, onlyLc), color: '#ffa116' },
+                { label: 'touched grass', value: stats.neitherDays, color: '#2a2a2a' },
+            ];
+            const total = segments.reduce((s, seg) => s + seg.value, 0) || 1;
+
+            const biggest = segments.reduce((a, b) => b.value > a.value ? b : a);
+            document.getElementById('pieSub').textContent = `most of your days were '${biggest.label}' days (${biggest.value} of ${total})`;
+
+            let angle = -Math.PI / 2;
+            segments.forEach(seg => {
+                const sweep = (seg.value / total) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, r, angle, angle + sweep);
+                ctx.closePath();
+                ctx.fillStyle = seg.color;
+                ctx.fill();
+                angle += sweep;
+            });
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, 52, 0, Math.PI * 2);
+            ctx.fillStyle = '#141414';
+            ctx.fill();
+
+            ctx.fillStyle = '#e0e0e0';
+            ctx.font = '600 22px IBM Plex Sans, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(stats.totalDays, cx, cy - 8);
+            ctx.fillStyle = '#6b6b6b';
+            ctx.font = '400 11px IBM Plex Sans, sans-serif';
+            ctx.fillText('days', cx, cy + 12);
+
+            const legend = document.getElementById(legendId);
+            legend.innerHTML = '';
+            segments.forEach(seg => {
+                if (seg.value === 0) return;
+                const item = document.createElement('div');
+                item.className = 'pie-legend-item';
+                item.innerHTML = `<div class="pie-legend-dot" style="background:${seg.color}"></div>${seg.label} (${seg.value})`;
+                legend.appendChild(item);
+            });
+        }
+
+        function drawBarChart(canvasId, dates, lbMap, lcMap) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const w = 400, h = 220;
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
+            ctx.scale(dpr, dpr);
+            ctx.clearRect(0, 0, w, h);
+
+            const pad = { top: 20, right: 12, bottom: 28, left: 12 };
+            const chartW = w - pad.left - pad.right;
+            const chartH = h - pad.top - pad.bottom;
+            const midY = pad.top + chartH / 2;
+
+            let lbCum = 0, lcCum = 0;
+            const diffs = [];
+            let movieLeadDays = 0, codeLeadDays = 0;
+            dates.forEach(d => {
+                lbCum += (lbMap[dateKey(d)] || []).length;
+                lcCum += lcMap[dateKey(d)] || 0;
+                const diff = lbCum - lcCum;
+                diffs.push(diff);
+                if (diff > 0) movieLeadDays++;
+                else if (diff < 0) codeLeadDays++;
+            });
+
+            const maxAbs = Math.max(Math.abs(Math.min(...diffs)), Math.abs(Math.max(...diffs)), 1);
+
+            const finalDiff = diffs[diffs.length - 1];
+            let subText;
+            if (movieLeadDays > codeLeadDays * 2) subText = `movies led for most of the period. cinema dominated.`;
+            else if (codeLeadDays > movieLeadDays * 2) subText = `code was ahead almost the entire time. relentless.`;
+            else if (Math.abs(finalDiff) <= 2) subText = `a neck-and-neck race that ended in a near-tie.`;
+            else subText = `lead changed hands ${Math.min(movieLeadDays, codeLeadDays)} times. a real contest.`;
+            document.getElementById('scoreSub').textContent = subText;
+
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(pad.left, midY);
+            ctx.lineTo(w - pad.right, midY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = 'rgba(0, 224, 84, 0.5)';
+            ctx.font = '500 9px IBM Plex Sans, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('movies ahead', pad.left + 4, pad.top + 6);
+            ctx.fillStyle = 'rgba(255, 161, 22, 0.5)';
+            ctx.fillText('code ahead', pad.left + 4, pad.top + chartH - 2);
+
+            const gap = chartW / (diffs.length - 1 || 1);
+            ctx.beginPath();
+            ctx.moveTo(pad.left, midY);
+            diffs.forEach((d, i) => {
+                const x = pad.left + i * gap;
+                const y = d > 0 ? midY - (d / maxAbs) * (chartH / 2) : midY;
+                ctx.lineTo(x, y);
+            });
+            ctx.lineTo(pad.left + (diffs.length - 1) * gap, midY);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(0, 224, 84, 0.15)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(pad.left, midY);
+            diffs.forEach((d, i) => {
+                const x = pad.left + i * gap;
+                const y = d < 0 ? midY - (d / maxAbs) * (chartH / 2) : midY;
+                ctx.lineTo(x, y);
+            });
+            ctx.lineTo(pad.left + (diffs.length - 1) * gap, midY);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255, 161, 22, 0.15)';
+            ctx.fill();
+
+            ctx.beginPath();
+            diffs.forEach((d, i) => {
+                const x = pad.left + i * gap;
+                const y = midY - (d / maxAbs) * (chartH / 2);
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            });
+            ctx.strokeStyle = finalDiff >= 0 ? '#00e054' : '#ffa116';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            const lastX = pad.left + (diffs.length - 1) * gap;
+            const lastY = midY - (finalDiff / maxAbs) * (chartH / 2);
+            ctx.beginPath();
+            ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+            ctx.fillStyle = finalDiff >= 0 ? '#00e054' : '#ffa116';
+            ctx.fill();
+
+            ctx.fillStyle = '#6b6b6b';
+            ctx.font = '400 10px IBM Plex Sans, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            const label = finalDiff > 0 ? `+${finalDiff} films` : finalDiff < 0 ? `+${Math.abs(finalDiff)} code` : 'tied';
+            ctx.fillText(label, lastX - 8, lastY);
+        }
+
+        function roundedRect(ctx, x, y, w, h, r) {
+            if (h <= 0) return;
+            r = Math.min(r, h / 2, w / 2);
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h);
+            ctx.lineTo(x, y + h);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+        }
+
+        function drawLineChart(canvasId, dates, lbMap, lcMap) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const w = 400, h = 220;
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
+            ctx.scale(dpr, dpr);
+            ctx.clearRect(0, 0, w, h);
+
+            const pad = { top: 12, right: 12, bottom: 28, left: 32 };
+            const chartW = w - pad.left - pad.right;
+            const chartH = h - pad.top - pad.bottom;
+
+            let lbCum = 0, lcCum = 0;
+            const lbPts = [], lcPts = [];
+            let crossovers = 0;
+            let prevLeader = null;
+            dates.forEach((d, i) => {
+                lbCum += (lbMap[dateKey(d)] || []).length;
+                lcCum += lcMap[dateKey(d)] || 0;
+                lbPts.push(lbCum);
+                lcPts.push(lcCum);
+                const leader = lbCum > lcCum ? 'lb' : lcCum > lbCum ? 'lc' : null;
+                if (prevLeader && leader && leader !== prevLeader) crossovers++;
+                if (leader) prevLeader = leader;
+            });
+            const maxVal = Math.max(lbCum, lcCum, 1);
+
+            const winner = lbCum > lcCum ? 'movies' : lcCum > lbCum ? 'code' : 'neither';
+            let raceSub;
+            if (crossovers === 0) raceSub = `${winner} led wire-to-wire. no contest.`;
+            else if (crossovers === 1) raceSub = `the lead changed once. a decisive shift.`;
+            else raceSub = `the lead changed ${crossovers} times. a proper back-and-forth.`;
+            document.getElementById('raceSub').textContent = raceSub;
+
+            ctx.strokeStyle = '#1a1a1a';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = pad.top + (chartH / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(pad.left, y);
+                ctx.lineTo(w - pad.right, y);
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = '#3d3d3d';
+            ctx.font = '400 10px IBM Plex Sans, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            for (let i = 0; i <= 4; i++) {
+                const val = Math.round(maxVal * (1 - i / 4));
+                const y = pad.top + (chartH / 4) * i;
+                ctx.fillText(val, pad.left - 6, y);
+            }
+
+            function drawLine(pts, color) {
+                if (pts.length < 2) return;
+                ctx.beginPath();
+                pts.forEach((v, i) => {
+                    const x = pad.left + (i / (pts.length - 1)) * chartW;
+                    const y = pad.top + chartH - (v / maxVal) * chartH;
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                });
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                const lastX = pad.left + chartW;
+                const baseline = pad.top + chartH;
+                ctx.lineTo(lastX, baseline);
+                ctx.lineTo(pad.left, baseline);
+                ctx.closePath();
+                ctx.fillStyle = color.replace(')', ', 0.06)').replace('rgb', 'rgba');
+                ctx.fill();
+            }
+
+            drawLine(lbPts, 'rgb(0, 224, 84)');
+            drawLine(lcPts, 'rgb(255, 161, 22)');
+
+            const lastI = lbPts.length - 1;
+            const lbEndY = pad.top + chartH - (lbPts[lastI] / maxVal) * chartH;
+            const lcEndY = pad.top + chartH - (lcPts[lastI] / maxVal) * chartH;
+            ctx.font = '500 10px IBM Plex Sans, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#00e054';
+            ctx.fillText(lbPts[lastI], pad.left + chartW + 4, lbEndY);
+            ctx.fillStyle = '#ffa116';
+            ctx.fillText(lcPts[lastI], pad.left + chartW + 4, lcEndY);
+        }
+
+        function drawWeekdayChart(canvasId, dates, lbMap, lcMap) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const w = 400, h = 220;
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
+            ctx.scale(dpr, dpr);
+            ctx.clearRect(0, 0, w, h);
+
+            const pad = { top: 12, right: 12, bottom: 38, left: 32 };
+            const chartW = w - pad.left - pad.right;
+            const chartH = h - pad.top - pad.bottom;
+
+            const lbByDay = Array(7).fill(0);
+            const lcByDay = Array(7).fill(0);
+            const countByDay = Array(7).fill(0);
+
+            dates.forEach(d => {
+                const dow = d.getDay();
+                countByDay[dow]++;
+                lbByDay[dow] += (lbMap[dateKey(d)] || []).length;
+                lcByDay[dow] += lcMap[dateKey(d)] || 0;
+            });
+
+            const lbAvg = lbByDay.map((v, i) => countByDay[i] > 0 ? v / countByDay[i] : 0);
+            const lcAvg = lcByDay.map((v, i) => countByDay[i] > 0 ? v / countByDay[i] : 0);
+            const totalAvg = lbAvg.map((v, i) => v + lcAvg[i]);
+            const maxVal = Math.max(...lbAvg, ...lcAvg, 1);
+
+            const groupW = chartW / 7;
+            const barW = groupW * 0.28;
+
+            let bestDay = 0, worstDay = 0;
+            totalAvg.forEach((v, i) => {
+                if (v > totalAvg[bestDay]) bestDay = i;
+                if (v < totalAvg[worstDay]) worstDay = i;
+            });
+
+            let movieDay = 0, codeDay = 0;
+            lbAvg.forEach((v, i) => { if (v > lbAvg[movieDay]) movieDay = i; });
+            lcAvg.forEach((v, i) => { if (v > lcAvg[codeDay]) codeDay = i; });
+
+            document.getElementById('weekSub').textContent =
+                `${DAY_NAMES[bestDay]} is your most active day. ${DAY_NAMES[movieDay]} is for movies, ${DAY_NAMES[codeDay]} for code.`;
+
+            ctx.strokeStyle = '#1a1a1a';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = pad.top + (chartH / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(pad.left, y);
+                ctx.lineTo(w - pad.right, y);
+                ctx.stroke();
+            }
+
+            for (let i = 0; i < 7; i++) {
+                const cx = pad.left + i * groupW + groupW / 2;
+                const lbH = (lbAvg[i] / maxVal) * chartH;
+                const lcH = (lcAvg[i] / maxVal) * chartH;
+
+                if (i === bestDay) {
+                    ctx.fillStyle = 'rgba(64, 188, 244, 0.06)';
+                    ctx.fillRect(pad.left + i * groupW, pad.top, groupW, chartH);
+                }
+
+                ctx.fillStyle = 'rgba(0, 224, 84, 0.7)';
+                ctx.beginPath();
+                roundedRect(ctx, cx - barW - 1, pad.top + chartH - lbH, barW, lbH, 3);
+                ctx.fill();
+
+                ctx.fillStyle = 'rgba(255, 161, 22, 0.7)';
+                ctx.beginPath();
+                roundedRect(ctx, cx + 1, pad.top + chartH - lcH, barW, lcH, 3);
+                ctx.fill();
+
+                ctx.fillStyle = i === bestDay ? '#e0e0e0' : '#3d3d3d';
+                ctx.font = (i === bestDay ? '500' : '400') + ' 10px IBM Plex Sans, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillText(DAY_NAMES[i], cx, pad.top + chartH + 6);
+
+                if (i === bestDay) {
+                    ctx.fillStyle = '#40bcf4';
+                    ctx.font = '400 8px IBM Plex Sans, sans-serif';
+                    ctx.fillText('peak', cx, pad.top + chartH + 20);
+                } else if (i === worstDay && worstDay !== bestDay) {
+                    ctx.fillStyle = '#3d3d3d';
+                    ctx.font = '400 8px IBM Plex Sans, sans-serif';
+                    ctx.fillText('quiet', cx, pad.top + chartH + 20);
+                }
+            }
+        }
+
+        function computeInsights(dates, lbMap, lcMap) {
+            let lbDays = 0, lcDays = 0, bothDays = 0, neitherDays = 0;
+            let lbTotal = 0, lcTotal = 0;
+            let lbStreak = 0, lbBest = 0, lcStreak = 0, lcBest = 0;
+            let bestLbDay = null, bestLbCount = 0;
+            let bestLcDay = null, bestLcCount = 0;
+
+            dates.forEach(d => {
+                const key = dateKey(d);
+                const lbCount = (lbMap[key] || []).length;
+                const lcCount = lcMap[key] || 0;
+                lbTotal += lbCount;
+                lcTotal += lcCount;
+                if (lbCount > 0) { lbDays++; lbStreak++; lbBest = Math.max(lbBest, lbStreak); } else lbStreak = 0;
+                if (lcCount > 0) { lcDays++; lcStreak++; lcBest = Math.max(lcBest, lcStreak); } else lcStreak = 0;
+                if (lbCount > 0 && lcCount > 0) bothDays++;
+                if (lbCount === 0 && lcCount === 0) neitherDays++;
+                if (lbCount > bestLbCount) { bestLbCount = lbCount; bestLbDay = key; }
+                if (lcCount > bestLcCount) { bestLcCount = lcCount; bestLcDay = key; }
+            });
+
+            const codingDaysAvg = lcDays > 0 ? (dates.filter(d => (lcMap[dateKey(d)] || 0) > 0).reduce((s, d) => s + (lbMap[dateKey(d)] || []).length, 0) / lcDays) : 0;
+            const restDaysAvg = (dates.length - lcDays) > 0 ? (dates.filter(d => (lcMap[dateKey(d)] || 0) === 0).reduce((s, d) => s + (lbMap[dateKey(d)] || []).length, 0) / (dates.length - lcDays)) : 0;
+
+            return { lbDays, lcDays, bothDays, neitherDays, lbTotal, lcTotal, lbBest, lcBest, bestLbDay, bestLbCount, bestLcDay, bestLcCount, codingDaysAvg, restDaysAvg, totalDays: dates.length };
+        }
+
+        function renderStats(stats) {
+            const pers = document.getElementById('personality');
+            const lbRatio = stats.lbDays / Math.max(stats.totalDays, 1);
+            const lcRatio = stats.lcDays / Math.max(stats.totalDays, 1);
+            const bothRatio = stats.bothDays / Math.max(stats.totalDays, 1);
+            const neitherRatio = stats.neitherDays / Math.max(stats.totalDays, 1);
+
+            let pLabel, pSub;
+            if (bothRatio > 0.5) {
+                pLabel = 'the machine';
+                pSub = `you did both on ${stats.bothDays} of ${stats.totalDays} days. most people can't even commit to one hobby, you're juggling two.`;
+            } else if (neitherRatio > 0.6) {
+                pLabel = 'the ghost';
+                pSub = `${stats.neitherDays} days of doing absolutely neither. the couch knows your name by now. or maybe you just have a life outside screens.`;
+            } else if (lbRatio > 0.7 && lcRatio < 0.2) {
+                pLabel = 'cinema addict';
+                pSub = `movies on ${stats.lbDays} out of ${stats.totalDays} days — leetcode barely got a look in. the algorithm can wait, apparently.`;
+            } else if (lcRatio > 0.7 && lbRatio < 0.2) {
+                pLabel = 'grindset activated';
+                pSub = `${stats.lcDays} days of leetcode and barely any movies. who hurt you? (just kidding, your interview prep is looking strong.)`;
+            } else if (Math.abs(lbRatio - lcRatio) < 0.15 && lbRatio > 0.3) {
+                pLabel = 'balanced human';
+                pSub = `movies and code in near-equal measure. you've figured out what most people can't — enjoying both sides of the screen.`;
+            } else if (lbRatio > lcRatio) {
+                pLabel = 'film buff';
+                pSub = `movies won this round — ${stats.lbDays} film days vs ${stats.lcDays} code days. the projector stays warm.`;
+            } else {
+                pLabel = 'code warrior';
+                pSub = `${stats.lcDays} coding days edges out ${stats.lbDays} movie days. the terminal calls and you answer.`;
+            }
+            pers.innerHTML = `<div class="personality-label">${pLabel}</div><div class="personality-sub">${pSub}</div>`;
+
+            const funGrid = document.getElementById('funStats');
+            funGrid.innerHTML = '';
+
+            const avgRuntime = 110;
+            const totalMinutes = stats.lbTotal * avgRuntime;
+            const totalHrs = (totalMinutes / 60).toFixed(1);
+            const fullDays = Math.floor(totalMinutes / 1440);
+            const lcPerMovie = stats.lbTotal > 0 ? (stats.lcTotal / stats.lbTotal).toFixed(1) : '--';
+
+            const bestStreakWinner = stats.lbBest >= stats.lcBest ? 'movies' : 'code';
+            const bestStreakVal = Math.max(stats.lbBest, stats.lcBest);
+
+            const funCards = [
+                {
+                    cls: 'card-lb',
+                    value: `you watched <span class="accent-lb">${stats.lbTotal}</span> films`,
+                    desc: `that's roughly ${totalHrs} hours of screen time — about ${fullDays} full day${fullDays === 1 ? '' : 's'} of your life spent in other people's stories.`
+                },
+                {
+                    cls: 'card-lc',
+                    value: `you submitted code <span class="accent-lc">${stats.lcTotal}</span> times`,
+                    desc: `for every film you watched, you submitted ${lcPerMovie} leetcode solutions. ${stats.lcTotal > stats.lbTotal ? 'code is clearly winning your attention.' : 'cinema still has your heart.'}`
+                },
+                {
+                    cls: 'card-both',
+                    value: `your best streak: <span class="accent-both">${bestStreakVal}</span> days of ${bestStreakWinner}`,
+                    desc: `${bestStreakVal >= 7 ? 'a full week without breaking the chain — that takes real commitment.' : bestStreakVal >= 3 ? 'a solid run. consistency is underrated.' : 'just getting warmed up. the streak starts now.'}`
+                },
+                {
+                    cls: stats.bothDays > 0 ? 'card-both' : '',
+                    value: stats.bothDays > 0
+                        ? `<span class="accent-both">${stats.bothDays}</span> day${stats.bothDays === 1 ? '' : 's'} of doing both`
+                        : `you never did both on the same day`,
+                    desc: stats.bothDays > 0
+                        ? `you watched a film and coded on the same day ${stats.bothDays} time${stats.bothDays === 1 ? '' : 's'}. multitasking or just a long day?`
+                        : `you're a one-thing-at-a-time person. there's something to be said for that kind of focus.`
+                }
+            ];
+
+            funCards.forEach(c => {
+                const el = document.createElement('div');
+                el.className = 'fun-card ' + c.cls;
+                el.innerHTML = `<div class="fun-card-value">${c.value}</div><div class="fun-card-desc">${c.desc}</div>`;
+                funGrid.appendChild(el);
+            });
+
+            const verdicts = document.getElementById('verdicts');
+            verdicts.innerHTML = '';
+            const lines = [];
+
+            if (stats.lcDays > 0 && (stats.totalDays - stats.lcDays) > 0) {
+                const diff = stats.codingDaysAvg - stats.restDaysAvg;
+                if (diff < -0.3) {
+                    lines.push(`on days you coded, you watched ${Math.abs(diff).toFixed(1)} fewer films on average. coding puts you in focus mode — movies can wait.`);
+                } else if (diff > 0.3) {
+                    lines.push(`plot twist: you actually watched ${diff.toFixed(1)} more films on coding days. is that procrastination or a reward system? either way, it's working.`);
+                } else {
+                    lines.push(`no real correlation between coding and movie watching. they seem to exist in completely separate parts of your day.`);
+                }
+            }
+
+            if (stats.bothDays >= 2 && neitherRatio < 0.3) {
+                lines.push(`${stats.bothDays} days of doing both means you don't believe in picking sides. you want the full experience.`);
+            }
+
+            if (stats.bestLbCount >= 3) {
+                lines.push(`on ${stats.bestLbDay}, you watched ${stats.bestLbCount} films in a single day. that's a proper binge — hope you had snacks.`);
+            }
+            if (stats.bestLcCount >= 10) {
+                lines.push(`${stats.bestLcCount} leetcode submissions on ${stats.bestLcDay}. were you speedrunning through easy problems or battling one hard problem all day?`);
+            }
+
+            if (stats.neitherDays > stats.totalDays * 0.4) {
+                lines.push(`${stats.neitherDays} days where you did neither. maybe you touched grass. maybe your data has gaps. we don't judge.`);
+            }
+
+            const winner = stats.lbTotal > stats.lcTotal ? 'cinema' : stats.lcTotal > stats.lbTotal ? 'leetcode' : 'a perfect tie';
+            lines.push(`final score: ${stats.lbTotal} films vs ${stats.lcTotal} submissions. this round goes to ${winner}.`);
+
+            lines.forEach(l => {
+                const el = document.createElement('div');
+                el.className = 'verdict';
+                el.textContent = l;
+                verdicts.appendChild(el);
+            });
+
+            const grid = document.getElementById('statGrid');
+            grid.innerHTML = '';
+            const items = [
+                { num: stats.lbTotal, lab: 'films logged', cls: 'lb-c' },
+                { num: stats.lcTotal, lab: 'submissions', cls: 'lc-c' },
+                { num: stats.bothDays, lab: 'overlap days', cls: 'both-c' },
+                { num: stats.neitherDays, lab: 'rest days', cls: '' },
+                { num: stats.lbBest, lab: 'movie streak', cls: 'lb-c' },
+                { num: stats.lcBest, lab: 'code streak', cls: 'lc-c' }
+            ];
+            items.forEach(it => {
+                const el = document.createElement('div');
+                el.className = 'stat';
+                el.innerHTML = `<div class="num ${it.cls}">${it.num}</div><div class="lab">${it.lab}</div>`;
+                grid.appendChild(el);
+            });
+        }
+
+        function validateInputs() {
+            const lcInput = document.getElementById('lcInput');
+            const fileLabel = document.getElementById('lbFileLabel');
+            let errors = [];
+
+            lcInput.classList.remove('field-error');
+            fileLabel.classList.remove('file-error');
+
+            if (!pickedZipFile) {
+                fileLabel.classList.add('file-error');
+                errors.push('choose a letterboxd export zip');
+            }
+
+            const username = lcInput.value.trim();
+            if (!username) {
+                lcInput.classList.add('field-error');
+                errors.push('enter a leetcode username');
+            } else if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+                lcInput.classList.add('field-error');
+                errors.push('username can only contain letters, numbers, hyphens, underscores');
+            }
+
+            return errors;
+        }
+
+        document.getElementById('lbFile').addEventListener('change', e => {
+            const file = e.target.files[0];
+            const label = document.getElementById('lbFileLabel');
+            label.classList.remove('file-error');
+            if (file) {
+                pickedZipFile = file;
+                label.textContent = file.name;
+                label.classList.add('picked');
+            } else {
+                pickedZipFile = null;
+                label.textContent = 'choose .zip';
+                label.classList.remove('picked');
+            }
+        });
+
+        document.getElementById('lbFileLabel').addEventListener('click', () => {
+            document.getElementById('lbFile').click();
+        });
+
+        async function run() {
+            const status = document.getElementById('status');
+            const runBtn = document.getElementById('runBtn');
+            const out = document.getElementById('out');
+
+            const errors = validateInputs();
+            if (errors.length > 0) {
+                status.innerHTML = '<span class="err">' + errors.join(' · ') + '</span>';
+                return;
+            }
+
+            const lcUser = document.getElementById('lcInput').value.trim();
+
+            runBtn.disabled = true;
+            runBtn.classList.add('loading');
+            out.classList.remove('show');
+            status.textContent = `reading the letterboxd export and fetching @${lcUser} on leetcode...`;
+
+            const dates = getRangeDates(currentRange);
+
+            try {
+                const [lbResult, lcCalendar] = await Promise.all([
+                    parseLetterboxdZip(pickedZipFile),
+                    fetchLeetcode(lcUser)
+                ]);
+                const lbEntries = lbResult.entries;
+                const lbMap = buildLetterboxdMap(lbEntries);
+
+                document.getElementById('lbName').textContent = lbResult.username ? '@' + lbResult.username : 'letterboxd';
+                document.getElementById('lcName').textContent = '@' + lcUser;
+
+                const lbInRange = dates.reduce((s, d) => s + (lbMap[dateKey(d)] || []).length, 0);
+                const lcInRange = dates.reduce((s, d) => s + (lcCalendar[dateKey(d)] || 0), 0);
+                document.getElementById('lbTotal').textContent = lbInRange + ' logged';
+                document.getElementById('lcTotal').textContent = lcInRange + ' submissions';
+
+                renderGrid('lbGrid', dates, d => (lbMap[dateKey(d)] || []).length, (d, c) => {
+                    const key = dateKey(d);
+                    if (c === 0) return key + '\nnothing';
+                    const films = (lbMap[key] || []).map(e => e.title);
+                    return key + '\n' + films.join('\n');
+                });
+                renderGrid('lcGrid', dates, d => lcCalendar[dateKey(d)] || 0, (d, c) => dateKey(d) + ': ' + c + ' submission' + (c === 1 ? '' : 's'));
+
+                const stats = computeInsights(dates, lbMap, lcCalendar);
+                renderStats(stats);
+
+                drawPieChart('pieChart', 'pieLegend', stats);
+                drawBarChart('barChart', dates, lbMap, lcCalendar);
+                drawLineChart('lineChart', dates, lbMap, lcCalendar);
+                drawWeekdayChart('weekdayChart', dates, lbMap, lcCalendar);
+
+                lastResults = { dates, lbMap, lcCalendar, stats };
+                status.innerHTML = '<span class="ok">done</span>';
+                out.classList.add('show');
+            } catch (err) {
+                status.innerHTML = '<span class="err">' + err.message + '</span>';
+            } finally {
+                runBtn.disabled = false;
+                runBtn.classList.remove('loading');
+            }
+        }
+
+        document.getElementById('runBtn').addEventListener('click', run);
+        document.getElementById('lcInput').addEventListener('keydown', e => { if (e.key === 'Enter') run(); });
+
+        document.getElementById('lcInput').addEventListener('input', function () {
+            this.classList.remove('field-error');
+        });
+
+        document.getElementById('compareForm').addEventListener('submit', e => {
+            e.preventDefault();
+            run();
+        });
+
+        const infoBtn = document.getElementById('infoBtn');
+        const infoPopover = document.getElementById('infoPopover');
+        infoBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            const isOpen = infoPopover.classList.toggle('open');
+            infoBtn.setAttribute('aria-expanded', String(isOpen));
+        });
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.info-wrap')) {
+                infoPopover.classList.remove('open');
+                infoBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.getElementById('moreToggle').addEventListener('click', function () {
+            const content = document.getElementById('moreContent');
+            const isOpen = this.classList.toggle('open');
+            content.classList.toggle('open');
+            this.setAttribute('aria-expanded', String(isOpen));
+        });
+
+        console.log(
+            '%c letterboxd × leetcode ',
+            'background: #141414; color: #00e054; padding: 4px 8px; border-radius: 4px; font-family: IBM Plex Sans, sans-serif;'
+        );
+        console.log('all data stays in your browser. nothing is uploaded anywhere.');
+    </script>
+</body>
+
+</html>
