@@ -19,11 +19,7 @@ hii thx for visiting this repo :) if you're wondering what this is, it's basical
 ## what does it do?
 
 Upload your **Letterboxd `.zip` export** and enter your **LeetCode username** to compare your activity on both platforms.
-
-It shows your activity, streaks, daily patterns, and which one you used more.
-
-
-and yes, it also gives you a completely scientific personality diagnosis based on your screen time.
+It shows your activity, streaks, daily patterns, and which one you used more. and yes, it also gives you a completely scientific personality diagnosis based on your screen time.
 
 A day can fall into one of four categories:
 
@@ -69,13 +65,7 @@ The app includes four simple charts that show how your Letterboxd and LeetCode a
 
 ## privacy
 
-one of the main ideas behind this project was keeping the Letterboxd data local.
-
-your Letterboxd `.zip` is read entirely inside the browser.
-
-nothing from the uploaded export is sent to my server.
-
-the only external request made by the app is for the LeetCode submission calendar.
+one of the main ideas behind this project was keeping the Letterboxd data local. your Letterboxd `.zip` is read entirely inside the browser. nothing from the uploaded export is sent anyehere, the only external request made by the app is for the LeetCode submission calendar.
 
 > [!WARNING]
 > **LeetCode data requires an internet connection.**
