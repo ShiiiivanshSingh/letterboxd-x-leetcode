@@ -1,2 +1,4 @@
 still under developemnt u can test out if u want
-<img width="1470" height="956" alt="2026-08-14_14-07-35" src="https://github.com/user-attachments/assets/d02ce9d0-7f2e-4307-8cc1-7b66114a7c95" />
+
+
+<img width="1054" height="573" alt="image" src="https://github.com/user-attachments/assets/3743d67e-f89c-42d5-a76f-8e41a7bfb429" />
