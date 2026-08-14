@@ -1,4 +1,4 @@
 still under developemnt u can test out if u want
 
 
-<img width="1054" height="573" alt="image" src="https://github.com/user-attachments/assets/3743d67e-f89c-42d5-a76f-8e41a7bfb429" />
+<img width="985" height="561" alt="image" src="https://github.com/user-attachments/assets/a1895f5b-b387-4a57-816d-458fe7c61191" />
