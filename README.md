@@ -2,7 +2,7 @@
 
 ![letterboxd × leetcode](https://capsule-render.vercel.app/api?type=transparent\&height=100\&color=gradient\&text=letterboxd%20%C3%97%20leetcode\&animation=fadeIn\&textBg=false)
 
-[![Check out the live site](https://img.shields.io/badge/Check%20Out-Live%20Site-blue?style=for-the-badge)](https://github.com/ShiiiivanshSingh/letterboxd-x-leetcode)
+[![Check out the live site](https://img.shields.io/badge/Check%20Out-Live%20Site-blue?style=for-the-badge)](https://shiiiivanshsingh.github.io/letterboxd-x-leetcode/)
 
 hii thx for visiting this repo :) if you're wondering what this is, it's basically a tiny experiment to answer one very important question: **where have you been more active?** **LETTERBOXD OR LEETCODE** so lets settle the score.
 
