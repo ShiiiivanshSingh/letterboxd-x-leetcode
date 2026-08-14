@@ -18,36 +18,24 @@ hii thx for visiting this repo :) if you're wondering what this is, it's basical
 
 ## what does it do?
 
-give it:
+Upload your **Letterboxd `.zip` export** and enter your **LeetCode username** to compare your activity on both platforms.
 
-* your **Letterboxd `.zip` export**
-* your **LeetCode username**
+It shows your activity, streaks, daily patterns, and which one you used more.
 
-and it compares your activity across both platforms.
-
-you can look at your:
-
-* past **30 days**
-* current **month**
-* Letterboxd activity
-* LeetCode submissions
-* overlapping days
-* inactive days
-* streaks
-* daily activity
-* weekly patterns
-* overall winner
 
 and yes, it also gives you a completely scientific personality diagnosis based on your screen time.
 
 A day can fall into one of four categories:
 
-```text
-🎬 movie night
-💻 grind mode
-🔵 double threat
-🌱 touched grass
-```
+
+> movie night
+
+> grind mode
+
+> double threat
+
+> touched grass
+
 
 ## personality system
 
@@ -67,12 +55,10 @@ code warrior
 
 the label is based on how frequently you used each platform during the selected period.
 
-for example, doing both on more than half of the days makes you:
-
+for example, doing both on more than half of the days makes you: 
 > the machine
 
-while heavily favoring Letterboxd makes you:
-
+while heavily favoring Letterboxd makes you: 
 > cinema addict
 
 
